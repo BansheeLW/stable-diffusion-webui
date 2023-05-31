@@ -17,6 +17,7 @@ from secrets import compare_digest
 import modules.shared as shared
 from modules import sd_samplers, deepbooru, sd_hijack, images, scripts, ui, postprocessing
 from modules.api.models import *
+from modules.api.post_hook import PostHook
 from modules.processing import StableDiffusionProcessingTxt2Img, StableDiffusionProcessingImg2Img, process_images
 from modules.textual_inversion.textual_inversion import create_embedding, train_embedding
 from modules.textual_inversion.preprocess import preprocess
@@ -790,6 +791,7 @@ class Api:
                     sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
                 response = self.text2imgapi(req.txt2img_payload)
                 response.images = self.post_invocations(response.images, quality)
+                PostHook().text_to_image_hook(req, response.images)
                 return response
             elif req.task == 'image-to-image':
                 if embeddings_s3uri != '':
@@ -797,23 +799,30 @@ class Api:
                     sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
                 response = self.img2imgapi(req.img2img_payload)
                 response.images = self.post_invocations(response.images, quality)
+                PostHook().image_to_image_hook(req, response.images)
                 return response
             elif req.task == 'extras-single-image':
                 response = self.extras_single_image_api(req.extras_single_payload)
                 response.image = self.post_invocations([response.image], quality)[0]
+                PostHook().extras_single_image_hook(req, response.image)
                 return response
             elif req.task == 'extras-batch-images':
                 response = self.extras_batch_images_api(req.extras_batch_payload)
                 response.images = self.post_invocations(response.images, quality)
+                PostHook().extras_batch_images_hook(req, response.images)
                 return response
             elif req.task == 'interrogate':
                 response = self.interrogateapi(req.interrogate_payload)
+                PostHook().interrogate_hook(req, response.images)
                 return response
             else:
+                error_response=InvocationsErrorResponse(error=f'Invalid task - {req.task}')
+                PostHook().invalid_task_hook(req, error_response)
                 return InvocationsErrorResponse(error = f'Invalid task - {req.task}')
 
         except Exception as e:
             traceback.print_exc()
+            PostHook().exception_task_hook(req, e)
             return InvocationsErrorResponse(error = str(e))
 
     def ping(self):

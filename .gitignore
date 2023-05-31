@@ -31,3 +31,5 @@ notification.mp3
 /test/stdout.txt
 /test/stderr.txt
 build.info
+.DS_Store
+*.idea*

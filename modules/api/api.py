@@ -737,6 +737,7 @@ class Api:
     def post_invocations(self, b64images, quality):
         if shared.generated_images_s3uri:
             bucket, key = shared.get_bucket_and_key(shared.generated_images_s3uri)
+            key = shared.opts.data["s3_uri_key"]
             if key.endswith('/'):
                 key = key[ : -1]
             images = []

@@ -61,7 +61,6 @@ class PostHook:
 
         # 暂时逻辑和text_to_image一样，后续可能变动
         message = self.text_to_image_hook(req, images)
-        self._to_sqs(message)
 
         return message
 
@@ -165,7 +164,7 @@ class PostHook:
 
         return message
 
-    def _to_sqs(self, message: str, quque_url: string = ""):
+    def _to_sqs(self, message: str, queue_url: string = ""):
         """
         通过SQS发生task回执
 
@@ -173,15 +172,27 @@ class PostHook:
             quque_url: SQS 队列URL
         Returns:
         """
-        if not quque_url:
+        if not queue_url:
             # todo 这里要指定aws region和aws account
             region = "us-west-2"
             account = "022637123599"
-            # quque_url格式为：f"https://sqs.{region}.amazonaws.com/{account}/sagemaker-hook"
-            quque_url = f"https://sqs.{region}.amazonaws.com/{account}/train_model_job_test"
+            # queue_url：f"https://sqs.{region}.amazonaws.com/{account}/sagemaker-hook"
+            queue_url = f"https://sqs.{region}.amazonaws.com/{account}/train_model_job_test"
+
+        payload_bytes = message.encode('utf-8')
+        payload_base64 = base64.b64encode(payload_bytes)
+        real_message = {
+            "biz_type": 0,
+            "topic": "inference_completed",
+            "metadata": {},
+            "payload": payload_base64.decode('utf-8'),
+            "queue_tag": -1,
+            "key": "",
+        }
+        real_message = json.dumps(real_message)
 
         client = boto3.client('sqs')
-        response = client.send_message(QueueUrl=quque_url, MessageBody=message)
+        response = client.send_message(QueueUrl=queue_url, MessageBody=real_message)
         return response
 
     def _to_http_endpoint(self):

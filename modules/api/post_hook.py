@@ -2,6 +2,7 @@ import json
 import string
 
 import boto3
+import base64
 
 from modules.api.models import InvocationsRequest, InvocationsErrorResponse
 

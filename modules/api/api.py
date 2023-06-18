@@ -792,6 +792,8 @@ class Api:
                     sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
                 response = self.text2imgapi(req.txt2img_payload)
                 response.images = self.post_invocations(response.images, quality)
+                print('-------text-to-image------')
+                print(f"the length text-to-image is {len(response.images)}")
                 PostHook().text_to_image_hook(req, response.images)
                 return response
             elif req.task == 'image-to-image':

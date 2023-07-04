@@ -3,6 +3,7 @@ import string
 
 import boto3
 import base64
+import traceback
 
 from modules.api.models import InvocationsRequest, InvocationsErrorResponse
 
@@ -158,7 +159,7 @@ class PostHook:
             "quality": req.quality,
             "options": req.options,
             "images": None,
-            "reason": f"exception_task_hook: {str(e)}"
+            "reason": f"exception_task_hook: {traceback.format_exc()}"
         }
         message = json.dumps(message)
         self._to_sqs(message)

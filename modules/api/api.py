@@ -847,7 +847,7 @@ class Api:
                         sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
                     response = self.text2imgapi(req.txt2img_payload)
                     response.images = self.post_invocations(response.images, quality)
-                    print(f"-------text-to-image-done------ {req.id)}")
+                    print(f"Task 'text-to-image' is done. Task ID: {req.id}")
                     print(f"the length text-to-image is {len(response.images)}")
                     PostHook().text_to_image_hook(req, response.images)
                     return response
@@ -857,8 +857,8 @@ class Api:
                         sd_hijack.model_hijack.embedding_db.load_textual_inversion_embeddings()
                     response = self.img2imgapi(req.img2img_payload)
                     response.images = self.post_invocations(response.images, quality)
-                    print(f"-------img-to-img-done------ {req.id)}" )
-                    print(f"the length img-to-img is {len(response.images)}")
+                    print(f"Task 'image-to-image' is done. Task ID: {req.id}")
+                    print(f"the length image-to-image is {len(response.images)}")
                     PostHook().image_to_image_hook(req, response.images)
                     return response
                 elif req.task == 'extras-single-image':
